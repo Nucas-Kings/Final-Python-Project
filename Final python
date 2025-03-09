@@ -1,0 +1,92 @@
+import tkinter as tk
+from tkinter import messagebox
+
+class Task:
+    def __init__(self, title, description=''):
+        self.title = title
+        self.description = description
+        self.completed = False
+
+    def mark_completed(self):
+        self.completed = True
+
+class ToDoListApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("To-Do List Application")
+        self.tasks = []
+
+        self.frame = tk.Frame(root)
+        self.frame.pack(pady=10)
+
+        self.task_listbox = tk.Listbox(
+            self.frame, width=50, height=10, selectmode=tk.SINGLE)
+        self.task_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
+
+        self.scrollbar = tk.Scrollbar(self.frame)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.BOTH)
+
+        self.task_listbox.config(yscrollcommand=self.scrollbar.set)
+        self.scrollbar.config(command=self.task_listbox.yview)
+
+        self.entry_title = tk.Entry(root, width=50)
+        self.entry_title.pack(pady=5)
+        self.entry_title.insert(0, "Enter task title...")
+
+        self.entry_description = tk.Entry(root, width=50)
+        self.entry_description.pack(pady=5)
+        self.entry_description.insert(0, "Enter task description...")
+
+        self.add_button = tk.Button(
+            root, text="Add Task", command=self.add_task)
+        self.add_button.pack(pady=5)
+
+        self.remove_button = tk.Button(
+            root, text="Remove Task", command=self.remove_task)
+        self.remove_button.pack(pady=5)
+
+        self.complete_button = tk.Button(
+            root, text="Mark as Completed", command=self.complete_task)
+        self.complete_button.pack(pady=5)
+
+    def update_task_listbox(self):
+        self.task_listbox.delete(0, tk.END)
+        for task in self.tasks:
+            status = "✓" if task.completed else "✗"
+            self.task_listbox.insert(
+                tk.END, f"{status} {task.title} - {task.description}")
+
+    def add_task(self):
+        title = self.entry_title.get().strip()
+        description = self.entry_description.get().strip()
+        if title == "":
+            messagebox.showwarning("Input Error", "Task title cannot be empty.")
+            return
+        task = Task(title, description)
+        self.tasks.append(task)
+        self.update_task_listbox()
+        self.entry_title.delete(0, tk.END)
+        self.entry_description.delete(0, tk.END)
+
+    def remove_task(self):
+        try:
+            selected_index = self.task_listbox.curselection()[0]
+            del self.tasks[selected_index]
+            self.update_task_listbox()
+        except IndexError:
+            messagebox.showwarning(
+                "Selection Error", "Please select a task to remove.")
+
+    def complete_task(self):
+        try:
+            selected_index = self.task_listbox.curselection()[0]
+            self.tasks[selected_index].mark_completed()
+            self.update_task_listbox()
+        except IndexError:
+            messagebox.showwarning(
+                "Selection Error", "Please select a task to mark as completed.")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ToDoListApp(root)
+    root.mainloop()
